@@ -4,7 +4,7 @@
 #
 Name     : duperemove
 Version  : 0.11.1
-Release  : 3
+Release  : 4
 URL      : https://github.com/markfasheh/duperemove/archive/v0.11.1.tar.gz
 Source0  : https://github.com/markfasheh/duperemove/archive/v0.11.1.tar.gz
 Summary  : No detailed summary available
