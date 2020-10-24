@@ -1,0 +1,51 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Nikolay Borisov <nborisov@suse.com>
+Date: Wed, 10 Jun 2020 18:27:12 +0300
+Subject: [PATCH] Fix declare_alloc_tracking macro (#229)
+
+This macro erroneously omitted using the passed _type argument when
+defining gmutex. Furthermore, every mutex defined by the macro is
+accessed via static functions implying it's private. Thus also make
+it static.
+---
+ memstats.h | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/memstats.h b/memstats.h
+index 6f8f3df..3df1062 100644
+--- a/memstats.h
++++ b/memstats.h
+@@ -57,7 +57,7 @@ static inline void decrement_counters(unsigned long long *num_type,
+ }
+ 
+ #define declare_alloc_tracking(_type)					\
+-GMutex	alloc_##_mutex;							\
++static GMutex alloc_##_type##_mutex;					\
+ unsigned long long num_##_type = 0;					\
+ unsigned long long max_##_type = 0;					\
+ static inline struct _type *malloc_##_type(void)			\
+@@ -65,7 +65,7 @@ static inline struct _type *malloc_##_type(void)			\
+ 	struct _type *t = malloc(sizeof(struct _type));			\
+ 	if (t)								\
+ 		increment_counters(&num_##_type, &max_##_type, 1ULL,	\
+-				   &alloc_##_mutex);			\
++				   &alloc_##_type##_mutex);		\
+ 	return t;							\
+ }									\
+ static inline struct _type *calloc_##_type(int n)			\
+@@ -73,13 +73,13 @@ static inline struct _type *calloc_##_type(int n)			\
+ 	struct _type *t = calloc(n, sizeof(struct _type));		\
+ 	if (t)								\
+ 		increment_counters(&num_##_type, &max_##_type, n,	\
+-				   &alloc_##_mutex);			\
++				   &alloc_##_type##_mutex);		\
+ 	return t;							\
+ }									\
+ static inline void free_##_type(struct _type *t)			\
+ {									\
+ 	if (t) {							\
+-		decrement_counters(&num_##_type, &alloc_##_mutex);	\
++		decrement_counters(&num_##_type, &alloc_##_type##_mutex);	\
+ 		free(t);						\
+ 	}								\
+ }									\

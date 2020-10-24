@@ -4,7 +4,7 @@
 #
 Name     : duperemove
 Version  : 0.11.1
-Release  : 4
+Release  : 5
 URL      : https://github.com/markfasheh/duperemove/archive/v0.11.1.tar.gz
 Source0  : https://github.com/markfasheh/duperemove/archive/v0.11.1.tar.gz
 Summary  : No detailed summary available
@@ -16,6 +16,7 @@ Requires: duperemove-man = %{version}-%{release}
 BuildRequires : pkgconfig(glib-2.0)
 BuildRequires : pkgconfig(sqlite3)
 BuildRequires : sqlite-autoconf-dev
+Patch1: 0001-Fix-declare_alloc_tracking-macro-229.patch
 
 %description
 # Duperemove
@@ -30,7 +31,6 @@ extents for deduplication using the Linux kernel extent-same ioctl.
 Summary: bin components for the duperemove package.
 Group: Binaries
 Requires: duperemove-license = %{version}-%{release}
-Requires: duperemove-man = %{version}-%{release}
 
 %description bin
 bin components for the duperemove package.
@@ -54,22 +54,29 @@ man components for the duperemove package.
 
 %prep
 %setup -q -n duperemove-0.11.1
+cd %{_builddir}/duperemove-0.11.1
+%patch1 -p1
 
 %build
 export http_proxy=http://127.0.0.1:9/
 export https_proxy=http://127.0.0.1:9/
 export no_proxy=localhost,127.0.0.1,0.0.0.0
-export LANG=C
-export SOURCE_DATE_EPOCH=1547100649
+export LANG=C.UTF-8
+export SOURCE_DATE_EPOCH=1603499267
+export GCC_IGNORE_WERROR=1
+export CFLAGS="$CFLAGS -fno-lto "
+export FCFLAGS="$FFLAGS -fno-lto "
+export FFLAGS="$FFLAGS -fno-lto "
+export CXXFLAGS="$CXXFLAGS -fno-lto "
 make  %{?_smp_mflags}
 
 
 %install
-export SOURCE_DATE_EPOCH=1547100649
+export SOURCE_DATE_EPOCH=1603499267
 rm -rf %{buildroot}
 mkdir -p %{buildroot}/usr/share/package-licenses/duperemove
-cp LICENSE %{buildroot}/usr/share/package-licenses/duperemove/LICENSE
-cp LICENSE.xxhash %{buildroot}/usr/share/package-licenses/duperemove/LICENSE.xxhash
+cp %{_builddir}/duperemove-0.11.1/LICENSE %{buildroot}/usr/share/package-licenses/duperemove/cca1a98df1d42b70d0e705fe296bf45230196c14
+cp %{_builddir}/duperemove-0.11.1/LICENSE.xxhash %{buildroot}/usr/share/package-licenses/duperemove/faa50d629c27ea217aba549a466c7082430e1528
 %make_install PREFIX=/usr SBINDIR=/usr/bin
 
 %files
@@ -84,8 +91,8 @@ cp LICENSE.xxhash %{buildroot}/usr/share/package-licenses/duperemove/LICENSE.xxh
 
 %files license
 %defattr(0644,root,root,0755)
-/usr/share/package-licenses/duperemove/LICENSE
-/usr/share/package-licenses/duperemove/LICENSE.xxhash
+/usr/share/package-licenses/duperemove/cca1a98df1d42b70d0e705fe296bf45230196c14
+/usr/share/package-licenses/duperemove/faa50d629c27ea217aba549a466c7082430e1528
 
 %files man
 %defattr(0644,root,root,0755)
